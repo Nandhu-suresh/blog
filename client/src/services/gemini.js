@@ -1,23 +1,22 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-
-// Initialize the Google Generative AI client
-const genAI = new GoogleGenerativeAI(API_KEY);
-
+// Proxy to server-side Gemini endpoint to keep API key secret
 export const getGeminiResponse = async (prompt) => {
-    if (!API_KEY) {
-        console.error("Gemini API Key is missing! Please check your .env file.");
-        return "Error: API Key is missing.";
+  try {
+    const BASE = import.meta.env.VITE_SERVER_URL || "";
+    const res = await fetch(`${BASE}/api/gemini`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt }),
+    });
+
+    if (!res.ok) {
+      console.error("Gemini proxy returned error", res.statusText);
+      return "Sorry, I couldn't fetch a response at the moment.";
     }
 
-    try {
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        return response.text();
-    } catch (error) {
-        console.error("Error fetching Gemini response:", error);
-        return "Sorry, I couldn't fetch a response at the moment.";
-    }
+    const data = await res.json();
+    return data.text || "Sorry, I couldn't fetch a response at the moment.";
+  } catch (error) {
+    console.error("Error calling Gemini proxy:", error);
+    return "Sorry, I couldn't fetch a response at the moment.";
+  }
 };
