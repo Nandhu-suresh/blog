@@ -7,6 +7,7 @@ import Home from "./pages/Home";
 import BlogView from "./pages/BlogView";
 import AdminDashboard from "./pages/AdminDashboard";
 import Navbar from "./components/Navbar";
+import ChatBot from "./components/chatbot";
 
 // Protected Route Component
 const ProtectedRoute = ({ children, adminOnly = false }) => {
@@ -30,6 +31,7 @@ function App() {
         <AppRoutes />
       </BrowserRouter>
     </AuthContextProvider>
+    
   );
 }
 
@@ -41,6 +43,8 @@ function AppRoutes() {
       {currentUser && <Navbar />}
       <Routes>
         <Route path="/login" element={!currentUser ? <Login /> : <Navigate to={currentUser.role === 'admin' ? "/admin" : "/"} />} />
+        <Route path="/chatbot" element={!currentUser ? <ChatBot /> : <Navigate to="/" />} />
+
         <Route path="/register" element={!currentUser ? <Register /> : <Navigate to="/" />} />
 
         {/* User Routes */}
@@ -52,6 +56,11 @@ function AppRoutes() {
         <Route path="/blog/:id" element={
           <ProtectedRoute>
             <BlogView />
+          </ProtectedRoute>
+        } />
+         <Route path="/chatbot" element={
+          <ProtectedRoute>
+            <ChatBot />
           </ProtectedRoute>
         } />
 
